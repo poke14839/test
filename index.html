@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SMART CONTRACT TEST</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider"></script>
+    <style>
+        body {
+            background-color: rgb(197, 93, 23);
+            font-size: 40px;
+            text-align: center;
+        }
+        button {
+            background-color: aquamarine;
+            font-size: 33px;
+            font-family: impact;
+        }
+        button:hover {
+            background-color: yellow;
+        }
+        input {
+            width: 40%;
+            height: 33px;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <button onclick="connectMetamask()">Connecter à MetaMask</button> <br>
+    <button onclick="connectWalletConnect()">Connecter avec WalletConnect</button> <br>
+    <p id="accountArea">Statut de connexion: non connecté</p>
+
+    <button onclick="connectContract()">Se connecter au contrat</button> <br>
+    <p id="contractArea">Statut de connexion: non connecté</p>
+
+    <button onclick="getBalanceApple()">Montant contrat</button>
+    <p id="balanceArea">Balance: Contrat non connecté</p>
+
+    <button onclick="depositContract()">Envoyer du matic</button>
+    <button onclick="withdraw()">Retirer le matic</button> <br>
+    <input type="number" id="depositInput" placeholder="Entrez le montant"><br><br><br><br><br>
+
+    <button onclick="readWord()">Afficher le message</button> <br>
+    <p id="dataArea">Statut: Pas de message</p>
+
+    <button onclick="changeWord()">Changer le message</button> <br>
+    <input type="text" id="inputArea" placeholder="Tapez votre message">
+
+    <script>
+        let account;
+        const Address = "0xbA186DFa19fe7a919D1981AE05953359846DCb42";
+
+        async function connectMetamask() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                    account = accounts[0];
+                    window.web3 = new Web3(window.ethereum);
+                    document.getElementById("accountArea").innerHTML = `Connecté: ${account}`;
+                } catch (error) {
+                    console.error(error);
+                }
+            } else {
+                alert("Veuillez installer MetaMask !");
+            }
+        }
+
+        async function connectWalletConnect() {
+            const provider = new WalletConnectProvider.default({
+                infuraId: "6372060ab3f64dbca8225eda5986777a", // Remplacez par votre ID Infura
+            });
+            await provider.enable();
+            window.web3 = new Web3(provider);
+            const accounts = await window.web3.eth.getAccounts();
+            account = accounts[0];
+            document.getElementById("accountArea").innerHTML = `Connecté: ${account}`;
+        }
+
+        async function connectContract() {
+            window.contract = new window.web3.eth.Contract(ABI, Address);
+            const data = await window.contract.methods.getAddress().call();
+            document.getElementById("contractArea").innerHTML = `Contrat connecté: ${data}`;
+        }
+
+        const getBalanceApple = async () => {
+            const data = await window.contract.methods.getBalance().call();
+            document.getElementById("balanceArea").innerHTML = `Contract Balance: ${data}`;
+        }
+
+        const depositContract = async () => {
+            const amount = document.getElementById("depositInput").value;
+            await window.contract.methods.deposit().send({from: account, value: amount});
+        }
+
+        const withdraw = async () => {
+            const amount = document.getElementById("depositInput").value;
+            await window.contract.methods.withdraw(amount).send({from: account});
+        }
+
+        const readWord = async () => {
+            const data = await window.contract.methods.getFlower().call();
+            document.getElementById("dataArea").innerHTML = `Votre message: ${data}`;
+        }
+
+        const changeWord = async () => {
+            const myEntry = document.getElementById("inputArea").value;
+            await window.contract.methods.changeFlower(myEntry).send({ from: account });
+        }
+        readWord();
+        
+    </script>
+</body>
+</html>
+<style>
+
+</style>
+<script>
+</script>
