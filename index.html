@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>SMART CONTRACT TEST</title>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.0/web3.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider/dist/umd/index.min.js"></script>
     <style>
         body {
@@ -38,7 +38,8 @@
         let account; // Compte utilisateur
         let provider; // Fournisseur (WalletConnect/MetaMask)
 
-        const Address = "0xbA186DFa19fe7a919D1981AE05953359846DCb42";
+        const Address = "0xbA186DFa19fe7a919D1981AE05953359846DCb42"; // Adresse du contrat
+        const ABI = []; // Remplacez par l'ABI de votre contrat
 
         // Connexion avec MetaMask
         async function connectMetamask() {
@@ -60,7 +61,7 @@
         async function connectWalletConnect() {
             try {
                 // Initialiser WalletConnect Provider
-                provider = new WalletConnectProvider.default({
+                provider = new WalletConnectProvider({
                     infuraId: "6372060ab3f64dbca8225eda5986777a" // Remplacez par votre propre ID Infura
                 });
 
@@ -91,18 +92,27 @@
 
             } catch (error) {
                 console.error("Erreur WalletConnect:", error);
+                alert("Erreur de connexion avec WalletConnect : " + error.message);
             }
         }
 
         // Connexion au contrat
         async function connectContract() {
             try {
-                const ABI = []; // Remplacez par ABI correct du contrat
+                if (!window.web3) {
+                    alert("Veuillez vous connecter à un portefeuille avant d'interagir avec le contrat.");
+                    return;
+                }
+
+                // Initialiser le contrat
                 window.contract = new window.web3.eth.Contract(ABI, Address);
+
+                // Exemple d'appel à une méthode
                 const data = await window.contract.methods.getAddress().call();
                 document.getElementById("contractArea").innerHTML = `Contrat connecté: ${data}`;
             } catch (error) {
                 console.error("Erreur connexion contrat:", error);
+                alert("Erreur de connexion au contrat : " + error.message);
             }
         }
     </script>
