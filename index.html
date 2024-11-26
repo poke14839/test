@@ -3,7 +3,7 @@
 <head>
     <title>SMART CONTRACT TEST</title>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider"></script>
+    <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider/dist/umd/index.min.js"></script>
     <style>
         body {
             background-color: rgb(197, 93, 23);
@@ -34,23 +34,13 @@
     <button onclick="connectContract()">Se connecter au contrat</button> <br>
     <p id="contractArea">Statut de connexion: non connecté</p>
 
-    <button onclick="getBalanceApple()">Montant contrat</button>
-    <p id="balanceArea">Balance: Contrat non connecté</p>
-
-    <button onclick="depositContract()">Envoyer du matic</button>
-    <button onclick="withdraw()">Retirer le matic</button> <br>
-    <input type="number" id="depositInput" placeholder="Entrez le montant"><br><br><br><br><br>
-
-    <button onclick="readWord()">Afficher le message</button> <br>
-    <p id="dataArea">Statut: Pas de message</p>
-
-    <button onclick="changeWord()">Changer le message</button> <br>
-    <input type="text" id="inputArea" placeholder="Tapez votre message">
-
     <script>
-        let account;
+        let account; // Compte utilisateur
+        let provider; // Fournisseur (WalletConnect/MetaMask)
+
         const Address = "0xbA186DFa19fe7a919D1981AE05953359846DCb42";
 
+        // Connexion avec MetaMask
         async function connectMetamask() {
             if (window.ethereum) {
                 try {
@@ -59,56 +49,62 @@
                     window.web3 = new Web3(window.ethereum);
                     document.getElementById("accountArea").innerHTML = `Connecté: ${account}`;
                 } catch (error) {
-                    console.error(error);
+                    console.error("Erreur MetaMask:", error);
                 }
             } else {
                 alert("Veuillez installer MetaMask !");
             }
         }
 
+        // Connexion avec WalletConnect
         async function connectWalletConnect() {
-            const provider = new WalletConnectProvider.default({
-                infuraId: "6372060ab3f64dbca8225eda5986777a", // Remplacez par votre ID Infura
-            });
-            await provider.enable();
-            window.web3 = new Web3(provider);
-            const accounts = await window.web3.eth.getAccounts();
-            account = accounts[0];
-            document.getElementById("accountArea").innerHTML = `Connecté: ${account}`;
+            try {
+                // Initialiser WalletConnect Provider
+                provider = new WalletConnectProvider.default({
+                    infuraId: "6372060ab3f64dbca8225eda5986777a" // Remplacez par votre propre ID Infura
+                });
+
+                // Activer le fournisseur (ouvre le scanner QR)
+                await provider.enable();
+
+                // Initialiser Web3 avec WalletConnect
+                window.web3 = new Web3(provider);
+
+                // Récupérer les comptes
+                const accounts = await window.web3.eth.getAccounts();
+                account = accounts[0];
+
+                // Affichage dans l'interface utilisateur
+                document.getElementById("accountArea").innerHTML = `Connecté: ${account}`;
+
+                // Ajouter des gestionnaires d'événements
+                provider.on("accountsChanged", (accounts) => {
+                    account = accounts[0];
+                    console.log("Comptes modifiés:", accounts);
+                    document.getElementById("accountArea").innerHTML = `Connecté: ${account}`;
+                });
+
+                provider.on("disconnect", (code, reason) => {
+                    console.log("Déconnecté:", code, reason);
+                    document.getElementById("accountArea").innerHTML = "Statut de connexion: déconnecté";
+                });
+
+            } catch (error) {
+                console.error("Erreur WalletConnect:", error);
+            }
         }
 
+        // Connexion au contrat
         async function connectContract() {
-            window.contract = new window.web3.eth.Contract(ABI, Address);
-            const data = await window.contract.methods.getAddress().call();
-            document.getElementById("contractArea").innerHTML = `Contrat connecté: ${data}`;
+            try {
+                const ABI = []; // Remplacez par ABI correct du contrat
+                window.contract = new window.web3.eth.Contract(ABI, Address);
+                const data = await window.contract.methods.getAddress().call();
+                document.getElementById("contractArea").innerHTML = `Contrat connecté: ${data}`;
+            } catch (error) {
+                console.error("Erreur connexion contrat:", error);
+            }
         }
-
-        const getBalanceApple = async () => {
-            const data = await window.contract.methods.getBalance().call();
-            document.getElementById("balanceArea").innerHTML = `Contract Balance: ${data}`;
-        }
-
-        const depositContract = async () => {
-            const amount = document.getElementById("depositInput").value;
-            await window.contract.methods.deposit().send({from: account, value: amount});
-        }
-
-        const withdraw = async () => {
-            const amount = document.getElementById("depositInput").value;
-            await window.contract.methods.withdraw(amount).send({from: account});
-        }
-
-        const readWord = async () => {
-            const data = await window.contract.methods.getFlower().call();
-            document.getElementById("dataArea").innerHTML = `Votre message: ${data}`;
-        }
-
-        const changeWord = async () => {
-            const myEntry = document.getElementById("inputArea").value;
-            await window.contract.methods.changeFlower(myEntry).send({ from: account });
-        }
-        readWord();
-        
     </script>
 </body>
 </html>
