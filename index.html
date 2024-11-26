@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>SMART CONTRACT TEST</title>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.0/web3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider/dist/umd/index.min.js"></script>
     <style>
         body {
@@ -38,8 +38,7 @@
         let account; // Compte utilisateur
         let provider; // Fournisseur (WalletConnect/MetaMask)
 
-        const Address = "0xbA186DFa19fe7a919D1981AE05953359846DCb42"; // Adresse du contrat
-        const ABI = []; // Remplacez par l'ABI de votre contrat
+        const contractAddress = "0xbA186DFa19fe7a919D1981AE05953359846DCb42";
 
         // Connexion avec MetaMask
         async function connectMetamask() {
@@ -76,7 +75,7 @@
                 account = accounts[0];
 
                 // Affichage dans l'interface utilisateur
-                document.getElementById("accountArea").innerHTML = `Connecté: ${account}`;
+                document.getElementById("accountArea").innerHTML = `Connecté via WalletConnect: ${account}`;
 
                 // Ajouter des gestionnaires d'événements
                 provider.on("accountsChanged", (accounts) => {
@@ -92,27 +91,38 @@
 
             } catch (error) {
                 console.error("Erreur WalletConnect:", error);
-                alert("Erreur de connexion avec WalletConnect : " + error.message);
+                alert("Impossible de se connecter via WalletConnect : " + error.message);
             }
         }
 
         // Connexion au contrat
         async function connectContract() {
             try {
+                const ABI = [
+                    {
+                        "constant": true,
+                        "inputs": [],
+                        "name": "getAddress",
+                        "outputs": [{ "name": "", "type": "address" }],
+                        "type": "function"
+                    }
+                ]; // Remplacez par l'ABI correct de votre contrat
+
+                // Vérification que Web3 est bien initialisé
                 if (!window.web3) {
-                    alert("Veuillez vous connecter à un portefeuille avant d'interagir avec le contrat.");
+                    alert("Veuillez d'abord vous connecter avec MetaMask ou WalletConnect !");
                     return;
                 }
 
-                // Initialiser le contrat
-                window.contract = new window.web3.eth.Contract(ABI, Address);
-
-                // Exemple d'appel à une méthode
+                // Initialisation du contrat
+                window.contract = new window.web3.eth.Contract(ABI, contractAddress);
+                
+                // Appel d'une méthode du contrat (exemple)
                 const data = await window.contract.methods.getAddress().call();
-                document.getElementById("contractArea").innerHTML = `Contrat connecté: ${data}`;
+                document.getElementById("contractArea").innerHTML = `Contrat connecté, adresse récupérée: ${data}`;
             } catch (error) {
                 console.error("Erreur connexion contrat:", error);
-                alert("Erreur de connexion au contrat : " + error.message);
+                alert("Erreur lors de la connexion au contrat : " + error.message);
             }
         }
     </script>
