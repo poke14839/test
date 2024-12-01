@@ -1,3 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SMART CONTRACT TEST</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+    <style>
+        body {
+            background-color: rgb(197, 93, 23);
+            font-size: 40px;
+            text-align: center;
+        }
+        button {
+            background-color: aquamarine;
+            font-size: 33px;
+            font-family: impact;
+        }
+        button:hover {
+            background-color: yellow;
+        }
+        input {
+            width: 40%;
+            height: 33px;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <button onclick="connectMetamask()">Connecter a Meta Mask</button> <br>
+	<p id="accountArea">Connection Statue: non connecter</p>
+
+	<button onclick="connectContract()">Ce connecter au contract</button> <br>
+	<p id="contractArea">Connection Statue: non connecter</p>
+
+      <button onclick="getBalanceApple()">Montant contrat</button>
+      <p id="balanceArea">Balance: Contrat non connecter</p>
+
+        <button onclick="depositContract()">Envoyer du matic</button>
+        <button onclick="withdraw()">Retirer le matic</button> <br>
+        <input type="number" id="depositInput" placeholder="Entré le montant"><br><br><br><br><br>
+
+	<button onclick="readWord()">Afficher le message</button> <br>
+	<p id="dataArea">Statue: Pas de message</p>
+
+	<button onclick="changeWord()">Changer le message</button> <br>
+    <input type="text" id="inputArea" placeholder="Taper votre message"> 
 <script>
     let account;
 
@@ -129,3 +175,5 @@
 
     readWord();
 </script>
+</body>
+</html>
