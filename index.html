@@ -1,63 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>SMART CONTRACT TEST</title>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
-    <style>
-        body {
-            background-color: rgb(197, 93, 23);
-            font-size: 40px;
-            text-align: center;
+<script>
+    let account;
+
+    const connectMetamask = async () => {
+        if (window.ethereum !== "undefined") {
+            const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+            account = accounts[0];
+            document.getElementById("accountArea").innerHTML = `Compte: ${account}`;
         }
-        button {
-            background-color: aquamarine;
-            font-size: 33px;
-            font-family: impact;
-        }
-        button:hover {
-            background-color: yellow;
-        }
-        input {
-            width: 40%;
-            height: 33px;
-            font-size: 30px;
-        }
-    </style>
-</head>
-<body>
+    }
 
-    <button onclick="connectMetamask()">Connecter a Meta Mask</button> <br>
-	<p id="accountArea">Connection Statue: non connecter</p>
-
-	<button onclick="connectContract()">Ce connecter au contract</button> <br>
-	<p id="contractArea">Connection Statue: non connecter</p>
-
-      <button onclick="getBalanceApple()">Montant contrat</button>
-      <p id="balanceArea">Balance: Contrat non connecter</p>
-
-        <button onclick="depositContract()">Envoyer du matic</button>
-        <button onclick="withdraw()">Retirer le matic</button> <br>
-        <input type="number" id="depositInput" placeholder="Entré le montant"><br><br><br><br><br>
-
-	<button onclick="readWord()">Afficher le message</button> <br>
-	<p id="dataArea">Statue: Pas de message</p>
-
-	<button onclick="changeWord()">Changer le message</button> <br>
-    <input type="text" id="inputArea" placeholder="Taper votre message"> 
-
-    <script>
-        let account;
-        const connectMetamask = async () => {
-            if(window.ethereum !== "undefined"){
-                const accounts = await ethereum.request({method: "eth_requestAccounts"});
-                account = accounts[0];
-                document.getElementById("accountArea").innerHTML = `Compte: ${account}`;
-            }
-
-        }
-
-        const connectContract = async () => {
-            const ABI = [
+    const connectContract = async () => {
+        const ABI = [
 	{
 		"inputs": [
 			{
@@ -131,47 +84,48 @@
 		"type": "function"
 	}
 ];
-            const Address = "0xd9145CCE52D386f254917e481eB44e9943F39138";
-            window.web3 = await new Web3(window.ethereum);
-            window.contract = await new window.web3.eth.Contract(ABI, Address);
-            const data = await window.contract.methods.getAddress().call();
-            document.getElementById("contractArea").innerHTML = `Contrat connecter: ${data}`;
-            const connectContract = document.querySelector
-            ('.connectContract');
+        const Address = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+        window.web3 = new Web3(window.ethereum);
+        window.contract = new window.web3.eth.Contract(ABI, Address);
 
-            connectContract.addEventListener('click',
-               async () => {
-                  await navigator.clipboard.writeText ("bienvenue")
-});
+        const data = await window.contract.methods.getAddress().call();
+        document.getElementById("contractArea").innerHTML = `Contrat connecté: ${data}`;
+    }
 
+    // Fonction déclenchée automatiquement lors du chargement de la page
+    window.onload = async () => {
+        try {
+            await connectMetamask();
+            await connectContract();
+        } catch (error) {
+            console.error("Erreur lors de la connexion automatique :", error);
         }
+    }
 
-        const getBalanceApple = async () => {
-            const data = await window.contract.methods.getBalance().call();
-            document.getElementById("balanceArea").innerHTML = `Contract Balance: ${data}`;
-        }
+    const getBalanceApple = async () => {
+        const data = await window.contract.methods.getBalance().call();
+        document.getElementById("balanceArea").innerHTML = `Contract Balance: ${data}`;
+    }
 
-        const depositContract = async () => {
-            const amount = document.getElementById("depositInput").value;
-            await window.contract.methods.deposit().send({from: account, value: amount});
-        }
+    const depositContract = async () => {
+        const amount = document.getElementById("depositInput").value;
+        await window.contract.methods.deposit().send({ from: account, value: amount });
+    }
 
-        const withdraw = async () => {
-            const amount = document.getElementById("depositInput").value;
-            await window.contract.methods.withdraw(amount).send({from: account});
-        }
+    const withdraw = async () => {
+        const amount = document.getElementById("depositInput").value;
+        await window.contract.methods.withdraw(amount).send({ from: account });
+    }
 
-        const readWord = async () => {
-            const data = await window.contract.methods.getFlower().call();
-            document.getElementById("dataArea").innerHTML = `Votre message: ${data}`;
-        }
+    const readWord = async () => {
+        const data = await window.contract.methods.getFlower().call();
+        document.getElementById("dataArea").innerHTML = `Votre message: ${data}`;
+    }
 
-        const changeWord = async () => {
-            const myEntry = document.getElementById("inputArea").value;
-            await window.contract.methods.changeFlower(myEntry).send({ from: account });
-        }
-        readWord();
-        
-    </script>
-</body>
-</html>       
+    const changeWord = async () => {
+        const myEntry = document.getElementById("inputArea").value;
+        await window.contract.methods.changeFlower(myEntry).send({ from: account });
+    }
+
+    readWord();
+</script>
