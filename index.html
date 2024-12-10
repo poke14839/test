@@ -44,19 +44,20 @@
 
 	<button onclick="changeWord()">Changer le message</button> <br>
     <input type="text" id="inputArea" placeholder="Taper votre message"> 
-<script>
-    let account;
 
-    const connectMetamask = async () => {
-        if (window.ethereum !== "undefined") {
-            const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-            account = accounts[0];
-            document.getElementById("accountArea").innerHTML = `Compte: ${account}`;
+    <script>
+        let account;
+        const connectMetamask = async () => {
+            if(window.ethereum !== "undefined"){
+                const accounts = await ethereum.request({method: "eth_requestAccounts"});
+                account = accounts[0];
+                document.getElementById("accountArea").innerHTML = `Compte: ${account}`;
+            }
+
         }
-    }
 
-    const connectContract = async () => {
-        const ABI = [
+        const connectContract = async () => {
+            const ABI = [
 	{
 		"inputs": [
 			{
@@ -130,50 +131,47 @@
 		"type": "function"
 	}
 ];
-        const Address = "0xd9145CCE52D386f254917e481eB44e9943F39138";
-        window.web3 = new Web3(window.ethereum);
-        window.contract = new window.web3.eth.Contract(ABI, Address);
+            const Address = "0x9961401aF816A56ef71845bC36146dcE1Dd9BC11";
+            window.web3 = await new Web3(window.ethereum);
+            window.contract = await new window.web3.eth.Contract(ABI, Address);
+            const data = await window.contract.methods.getAddress().call();
+            document.getElementById("contractArea").innerHTML = `Contrat connecter: ${data}`;
+            const connectContract = document.querySelector
+            ('.connectContract');
 
-        const data = await window.contract.methods.getAddress().call();
-        document.getElementById("contractArea").innerHTML = `Contrat connecté: ${data}`;
-    }
+            connectContract.addEventListener('click',
+               async () => {
+                  await navigator.clipboard.writeText ("bienvenue")
+});
 
-    // Fonction déclenchée automatiquement lors du chargement de la page
-    window.onload = async () => {
-        try {
-            await connectMetamask();
-            await connectContract();
-        } catch (error) {
-            console.error("Erreur lors de la connexion automatique :", error);
         }
-    }
 
-    const getBalanceApple = async () => {
-        const data = await window.contract.methods.getBalance().call();
-        document.getElementById("balanceArea").innerHTML = `Contract Balance: ${data}`;
-    }
+        const getBalanceApple = async () => {
+            const data = await window.contract.methods.getBalance().call();
+            document.getElementById("balanceArea").innerHTML = `Contract Balance: ${data}`;
+        }
 
-    const depositContract = async () => {
-        const amount = document.getElementById("depositInput").value;
-        await window.contract.methods.deposit().send({ from: account, value: amount });
-    }
+        const depositContract = async () => {
+            const amount = document.getElementById("depositInput").value;
+            await window.contract.methods.deposit().send({from: account, value: amount});
+        }
 
-    const withdraw = async () => {
-        const amount = document.getElementById("depositInput").value;
-        await window.contract.methods.withdraw(amount).send({ from: account });
-    }
+        const withdraw = async () => {
+            const amount = document.getElementById("depositInput").value;
+            await window.contract.methods.withdraw(amount).send({from: account});
+        }
 
-    const readWord = async () => {
-        const data = await window.contract.methods.getFlower().call();
-        document.getElementById("dataArea").innerHTML = `Votre message: ${data}`;
-    }
+        const readWord = async () => {
+            const data = await window.contract.methods.getFlower().call();
+            document.getElementById("dataArea").innerHTML = `Votre message: ${data}`;
+        }
 
-    const changeWord = async () => {
-        const myEntry = document.getElementById("inputArea").value;
-        await window.contract.methods.changeFlower(myEntry).send({ from: account });
-    }
-
-    readWord();
-</script>
+        const changeWord = async () => {
+            const myEntry = document.getElementById("inputArea").value;
+            await window.contract.methods.changeFlower(myEntry).send({ from: account });
+        }
+        readWord();
+        
+    </script>
 </body>
-</html>
+</html>       
